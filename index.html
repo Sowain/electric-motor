@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>How an Electric Motor Works · Physics Interactive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2a231c; --paper:#f4ecd9; --card:#fffaf0; --y:#ffd34d; --r:#e85d4c;
+  --b:#4a8fd4; --blue:#3d7ec9; --pink:#e85a9b; --wood:#c9995a; --wood2:#a8743a;
+  --ok:#5fbf72; --muted:#8a7e6e;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--paper);color:var(--ink);
+  font-family:Nunito,system-ui,sans-serif}
+body{background-image:radial-gradient(#e5d7b8 1.1px,transparent 1.1px);background-size:16px 16px}
+.hand{font-family:'Architects Daughter',cursive}
+button,input,label{font:inherit;color:inherit}
+button{cursor:pointer}
+
+.app{max-width:1280px;margin:0 auto;padding:10px 12px 28px;display:grid;gap:10px;
+  grid-template-columns:1fr;grid-template-areas:
+    "top" "tabs" "show" "stage" "gauges" "hold" "live" "idea" "controls"}
+@media(min-width:980px){
+  .app{grid-template-columns:260px 1fr 300px;grid-template-areas:
+    "top top top"
+    "tabs show show"
+    "live stage idea"
+    "live stage controls"
+    "gauges gauges hold"}
+}
+
+.top{grid-area:top;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.logo{display:inline-flex;align-items:center;gap:8px;background:var(--y);border:2.5px solid var(--ink);
+  border-radius:999px;padding:4px 12px 4px 6px;font-weight:800;box-shadow:3px 3px 0 var(--ink);
+  transform:rotate(-1.5deg)}
+.logo .bolt{width:28px;height:28px;border-radius:50%;background:#fff;border:2px solid var(--ink);
+  display:grid;place-items:center;font-size:16px}
+.titles h1{margin:0;font-size:clamp(1.25rem,2.6vw,1.85rem);font-weight:800;letter-spacing:-.02em}
+.titles p{margin:2px 0 0;color:var(--muted);font-size:.92rem;max-width:52ch}
+
+.tabs{grid-area:tabs;display:flex;gap:8px;align-items:center}
+.tab{border:2.5px solid var(--ink);background:#fff;border-radius:16px;padding:8px 10px;min-width:72px;
+  box-shadow:2px 2px 0 var(--ink);display:flex;flex-direction:column;align-items:center;gap:2px;font-weight:800;font-size:.78rem}
+.tab .ico{font-size:1.35rem;line-height:1}
+.tab.on{background:var(--y)}
+
+.showbar{grid-area:show;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;
+  background:var(--card);border:2.5px solid var(--ink);border-radius:16px;padding:8px 12px;
+  box-shadow:3px 3px 0 var(--ink)}
+.showbar .lbl{font-weight:800;margin-right:4px}
+.chk{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:.9rem;cursor:pointer}
+.chk input{accent-color:var(--b);width:16px;height:16px}
+
+.card{background:var(--card);border:2.5px solid var(--ink);border-radius:18px;
+  box-shadow:4px 4px 0 var(--ink);padding:12px}
+.card h3{margin:0 0 8px;font-size:1rem}
+.card h3 .hand{font-size:1.05rem}
+
+.stage{grid-area:stage;position:relative;min-height:340px;overflow:hidden;padding:8px}
+.stage svg{width:100%;height:auto;display:block;max-height:420px}
+.playbar{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);
+  display:flex;gap:8px;align-items:center;background:#fff;border:2.5px solid var(--ink);
+  border-radius:999px;padding:6px 10px;box-shadow:3px 3px 0 var(--ink)}
+.playbar button{width:40px;height:40px;border-radius:50%;border:2.5px solid var(--ink);background:#fff;
+  display:grid;place-items:center;font-size:1.1rem;box-shadow:2px 2px 0 var(--ink)}
+.playbar button#btnPlay{width:52px;height:52px;background:var(--y);font-size:1.35rem}
+
+.live{grid-area:live}
+.idea{grid-area:idea}
+.controls{grid-area:controls}
+.gauges{grid-area:gauges}
+.hold{grid-area:hold}
+
+.xsect{width:100%;height:150px;background:#fff;border:2px dashed var(--ink);border-radius:12px}
+.graph{width:100%;height:150px;background:#fff;border:2px dashed var(--ink);border-radius:12px;margin-top:8px}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;font-size:.72rem;margin-top:6px;color:#5a5044}
+.legend span{display:flex;align-items:center;gap:5px}
+.dot{width:12px;height:12px;border-radius:50%;border:1.5px solid var(--ink);display:inline-block}
+.note{font-size:.78rem;color:#5a5044;margin-top:6px;line-height:1.35}
+
+.hand-rule{display:flex;gap:10px;align-items:center}
+.hand-rule svg{width:110px;flex:0 0 auto}
+.hand-rule p{margin:0;font-size:.88rem;line-height:1.35}
+
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0;font-weight:700;font-size:.9rem}
+.toggle{position:relative;width:48px;height:28px;border-radius:999px;border:2.5px solid var(--ink);
+  background:#ddd;cursor:pointer;flex:0 0 auto;box-shadow:inset 0 0 0 0 var(--ink)}
+.toggle.on{background:var(--y)}
+.toggle i{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;
+  background:#fff;border:2px solid var(--ink);transition:left .15s}
+.toggle.on i{left:22px}
+
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{border:2.5px solid var(--ink);background:#fff;border-radius:12px;padding:6px 10px;
+  font-weight:800;font-size:.85rem;box-shadow:2px 2px 0 var(--ink)}
+.seg button.on{background:var(--y)}
+
+.slider{width:100%}
+.slider input[type=range]{width:100%;accent-color:var(--r);height:28px}
+.slider .meta{display:flex;justify-content:space-between;font-size:.82rem;font-weight:700}
+.slider .meta b{font-family:'Architects Daughter',cursive;font-size:1.05rem}
+
+.gauge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(max-width:600px){.gauge-grid{grid-template-columns:1fr}}
+.gauge{background:#fff;border:2px solid var(--ink);border-radius:12px;padding:8px 10px}
+.gauge .k{font-size:.75rem;font-weight:800;color:#6a5f52}
+.gauge .v{font-family:'Architects Daughter',cursive;font-size:1.15rem}
+.bar{height:10px;border-radius:6px;background:#eee;border:1.5px solid var(--ink);overflow:hidden;margin-top:4px}
+.bar>i{display:block;height:100%;background:var(--y);width:0%}
+.bar.orange>i{background:#f0a04b}
+.bar.red>i{background:var(--pink)}
+
+.hint{font-size:.8rem;color:#6a5f52;margin-top:4px}
+
+/* sketchy stroke helper on SVG text */
+.stage text,.live text{font-family:'Architects Daughter',cursive}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="logo"><span class="bolt">⚡</span> Physics Interactive</div>
+    <div class="titles">
+      <h1>How an Electric Motor Works</h1>
+      <p>Explore a real motor, change its setup and see how electricity and magnetism create motion.</p>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab on" data-tab="motor"><span class="ico">⚙️</span>Motor</button>
+    <button class="tab" data-tab="parts"><span class="ico">🧲</span>Parts</button>
+    <button class="tab" data-tab="principle"><span class="ico">✋</span>Principle</button>
+  </nav>
+
+  <div class="showbar">
+    <span class="lbl">Show</span>
+    <label class="chk"><input type="checkbox" id="showField" checked> Field lines</label>
+    <label class="chk"><input type="checkbox" id="showCurrent" checked> Current flow</label>
+    <label class="chk"><input type="checkbox" id="showForce" checked> Force arrows</label>
+    <label class="chk"><input type="checkbox" id="showLabels"> Part labels</label>
+  </div>
+
+  <section class="card stage" id="stageCard">
+    <svg id="motorSvg" viewBox="0 0 640 420" aria-label="Electric motor">
+      <defs>
+        <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" seed="2" result="n"/>
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter>
+        <pattern id="hatchB" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+          <line x1="0" y1="0" x2="0" y2="6" stroke="#2a5f9a" stroke-width="1.4" opacity=".35"/></pattern>
+        <pattern id="hatchR" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)">
+          <line x1="0" y1="0" x2="0" y2="6" stroke="#9a2f22" stroke-width="1.4" opacity=".35"/></pattern>
+        <marker id="arrPink" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="#e85a9b"/></marker>
+        <marker id="arrBlue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="#3d7ec9"/></marker>
+        <marker id="arrY" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="#e6a200"/></marker>
+      </defs>
+
+      <!-- wooden base -->
+      <g filter="url(#rough)">
+        <path d="M70 330 L560 330 L590 370 L40 370 Z" fill="#d4a66a" stroke="#2a231c" stroke-width="3"/>
+        <path d="M40 370 L590 370 L580 392 L55 392 Z" fill="#a8743a" stroke="#2a231c" stroke-width="3"/>
+        <path d="M100 300 L200 300 L210 330 L90 330 Z" fill="#c9995a" stroke="#2a231c" stroke-width="2.5"/>
+        <path d="M420 300 L520 300 L530 330 L410 330 Z" fill="#c9995a" stroke="#2a231c" stroke-width="2.5"/>
+      </g>
+
+      <!-- magnets group (positions swap on flip) -->
+      <g id="magLeft" filter="url(#rough)">
+        <path d="M95 95 Q55 200 95 295 L145 280 Q120 200 145 115 Z" fill="#4a8fd4" stroke="#2a231c" stroke-width="3"/>
+        <path d="M105 120 Q80 200 105 275 L135 265 Q120 200 135 130 Z" fill="url(#hatchB)"/>
+        <circle cx="118" cy="200" r="22" fill="#fff" stroke="#2a231c" stroke-width="2.5"/>
+        <text id="magLeftLetter" x="118" y="208" text-anchor="middle" font-size="26" font-weight="800" fill="#2a231c">S</text>
+      </g>
+      <g id="magRight" filter="url(#rough)">
+        <path d="M545 95 Q585 200 545 295 L495 280 Q520 200 495 115 Z" fill="#e85d4c" stroke="#2a231c" stroke-width="3"/>
+        <path d="M535 120 Q560 200 535 275 L505 265 Q520 200 505 130 Z" fill="url(#hatchR)"/>
+        <circle cx="522" cy="200" r="22" fill="#fff" stroke="#2a231c" stroke-width="2.5"/>
+        <text id="magRightLetter" x="522" y="208" text-anchor="middle" font-size="26" font-weight="800" fill="#2a231c">N</text>
+      </g>
+
+      <!-- field lines -->
+      <g id="fieldLines" stroke="#3d7ec9" stroke-width="2" fill="none" opacity=".85">
+        <path d="M150 140 H490" marker-end="url(#arrBlue)"/>
+        <path d="M150 175 H490" marker-end="url(#arrBlue)"/>
+        <path d="M150 210 H490" marker-end="url(#arrBlue)"/>
+        <path d="M150 245 H490" marker-end="url(#arrBlue)"/>
+        <path d="M150 280 H490" marker-end="url(#arrBlue)"/>
+      </g>
+
+      <!-- posts / brushes -->
+      <g filter="url(#rough)">
+        <rect x="250" y="255" width="14" height="55" rx="3" fill="#5a4636" stroke="#2a231c" stroke-width="2"/>
+        <rect x="376" y="255" width="14" height="55" rx="3" fill="#5a4636" stroke="#2a231c" stroke-width="2"/>
+        <rect x="244" y="248" width="26" height="12" rx="3" fill="#2a231c"/>
+        <rect x="370" y="248" width="26" height="12" rx="3" fill="#2a231c"/>
+      </g>
+
+      <!-- axle + coil (rotates) -->
+      <g id="rotor" transform="translate(320,200)">
+        <!-- axle -->
+        <line x1="-90" y1="0" x2="90" y2="0" stroke="#2a231c" stroke-width="5" stroke-linecap="round"/>
+        <!-- coil frame -->
+        <g id="coil" filter="url(#rough)">
+          <rect x="-55" y="-70" width="110" height="140" rx="6" fill="none" stroke="#c9853a" stroke-width="10"/>
+          <rect x="-48" y="-63" width="96" height="126" rx="4" fill="none" stroke="#e8b56a" stroke-width="4"/>
+          <!-- windings hint -->
+          <path d="M-50 -50 H50 M-50 -30 H50 M-50 -10 H50 M-50 10 H50 M-50 30 H50 M-50 50 H50"
+            stroke="#b87333" stroke-width="2.2" opacity=".7"/>
+        </g>
+        <!-- split / slip rings -->
+        <g id="rings">
+          <g id="splitRing">
+            <path d="M-28 -16 A18 16 0 0 1 -28 16" fill="#d0d4d8" stroke="#2a231c" stroke-width="2.5"/>
+            <path d="M28 -16 A18 16 0 0 0 28 16" fill="#d0d4d8" stroke="#2a231c" stroke-width="2.5"/>
+            <line x1="0" y1="-18" x2="0" y2="18" stroke="#2a231c" stroke-width="3"/>
+          </g>
+          <g id="slipRing" style="display:none">
+            <ellipse cx="-22" cy="0" rx="10" ry="16" fill="#c9a24a" stroke="#2a231c" stroke-width="2.5"/>
+            <ellipse cx="22" cy="0" rx="10" ry="16" fill="#c9a24a" stroke="#2a231c" stroke-width="2.5"/>
+          </g>
+        </g>
+      </g>
+
+      <!-- force arrows (world space, updated in JS) -->
+      <g id="forceArrows" stroke="#e85a9b" stroke-width="3.5" fill="none" marker-end="url(#arrPink)">
+        <path id="forceL" d="M250 260 L250 140"/>
+        <path id="forceR" d="M390 140 L390 260"/>
+      </g>
+
+      <!-- current dots along coil path (updated) -->
+      <g id="currentDots"></g>
+
+      <!-- rotation indicator -->
+      <g id="spinArrow" fill="none" stroke="#e6a200" stroke-width="3.5" marker-end="url(#arrY)">
+        <path d="M320 95 A95 70 0 0 1 410 150"/>
+        <path d="M320 95 A95 70 0 0 0 230 150"/>
+      </g>
+
+      <!-- battery -->
+      <g id="battery" filter="url(#rough)" transform="translate(285,338)">
+        <rect x="0" y="0" width="70" height="28" rx="6" fill="#7ecf7a" stroke="#2a231c" stroke-width="2.5"/>
+        <rect x="55" y="6" width="10" height="16" fill="#2a231c"/>
+        <text id="batPlus" x="48" y="20" font-size="14" font-weight="800">+</text>
+        <text id="batMinus" x="10" y="20" font-size="16" font-weight="800">−</text>
+      </g>
+      <!-- wires to brushes -->
+      <g id="wires" fill="none" stroke="#2a231c" stroke-width="3" stroke-linecap="round">
+        <path d="M285 352 H257 V260"/>
+        <path d="M355 352 H390 V260"/>
+      </g>
+
+      <!-- part labels -->
+      <g id="partLabels" class="hand" font-size="15" fill="#2a231c" style="display:none">
+        <text x="70" y="80">south pole</text>
+        <text x="500" y="80">north pole</text>
+        <text x="300" y="95" text-anchor="middle">coil</text>
+        <text x="320" y="245" text-anchor="middle">split ring</text>
+        <text x="220" y="270">brush</text>
+        <text x="400" y="270">brush</text>
+        <text x="200" y="200">axle</text>
+        <text x="360" y="380">battery</text>
+      </g>
+    </svg>
+
+    <div class="playbar">
+      <button id="btnReset" title="Restart">↺</button>
+      <button id="btnPlay" title="Play / Pause">⏸</button>
+      <button id="btnStep" title="Step">↻</button>
+    </div>
+  </section>
+
+  <aside class="card live" id="livePanel">
+    <h3><span class="hand">Live diagrams</span></h3>
+    <svg class="xsect" id="xsect" viewBox="0 0 260 150"></svg>
+    <svg class="graph" id="graph" viewBox="0 0 260 150"></svg>
+    <div class="legend">
+      <span><i class="dot" style="background:#ffd34d"></i> current coming out</span>
+      <span><i class="dot" style="background:#fff;display:inline-grid;place-items:center;font-weight:900;font-size:9px;line-height:1">✕</i> current going in</span>
+      <span><span style="color:#e85a9b;font-weight:900">↑</span> push on each side</span>
+      <span><span style="color:#3d7ec9">→</span> magnetic field</span>
+    </div>
+    <p class="note" id="ringNote">Split ring: swaps the current every half turn, so the coil keeps turning. Push is never backwards.</p>
+  </aside>
+
+  <aside class="card idea">
+    <h3><span class="hand">The Core Idea</span></h3>
+    <div class="hand-rule">
+      <svg viewBox="0 0 120 110" aria-hidden="true">
+        <g filter="url(#rough)">
+          <path d="M55 95 C40 80 35 55 48 40 C52 34 62 38 60 48 L58 70 L70 42 C74 34 86 38 82 50 L74 72 L88 55 C94 48 104 56 98 66 L78 92 C70 102 60 102 55 95Z" fill="#f2c8a0" stroke="#2a231c" stroke-width="2.5"/>
+          <path d="M48 40 L30 18" stroke="#e85a9b" stroke-width="3" marker-end="url(#arrPink)"/>
+          <text x="18" y="16" class="hand" font-size="14" fill="#e85a9b">F</text>
+          <path d="M82 50 L110 40" stroke="#3d7ec9" stroke-width="3" marker-end="url(#arrBlue)"/>
+          <text x="108" y="36" class="hand" font-size="14" fill="#3d7ec9">B</text>
+          <path d="M70 72 L95 95" stroke="#7b4cc7" stroke-width="3" marker-end="url(#arrY)"/>
+          <text x="98" y="108" class="hand" font-size="14" fill="#7b4cc7">I</text>
+        </g>
+      </svg>
+      <p>A current-carrying coil in a magnetic field experiences a force that makes it keep turning.</p>
+    </div>
+  </aside>
+
+  <aside class="card controls" id="controlsPanel">
+    <h3><span class="hand">Controls</span></h3>
+    <div class="row">Current <button class="toggle on" id="togCurrent" type="button" aria-pressed="true"><i></i></button></div>
+    <div class="row">Flip magnets <button class="toggle" id="togMag" type="button" aria-pressed="false"><i></i></button></div>
+    <div class="row">Flip battery <button class="toggle" id="togBat" type="button" aria-pressed="false"><i></i></button></div>
+
+    <div class="slider" style="margin-top:10px">
+      <div class="meta"><span>Battery voltage</span><b id="vVolt">1.5 V</b></div>
+      <input type="range" id="sVolt" min="0" max="3" step="0.1" value="1.5">
+    </div>
+    <div class="slider">
+      <div class="meta"><span>Magnet strength</span><b id="vMag">medium</b></div>
+      <input type="range" id="sMag" min="0.3" max="1.5" step="0.05" value="0.9">
+    </div>
+    <div class="slider">
+      <div class="meta"><span>Coil turns</span><b id="vTurns">5</b></div>
+      <input type="range" id="sTurns" min="1" max="10" step="1" value="5">
+    </div>
+    <div class="slider">
+      <div class="meta"><span>Turn speed</span><b id="vSpeed">70%</b></div>
+      <input type="range" id="sSpeed" min="0.15" max="1.2" step="0.05" value="0.7">
+    </div>
+
+    <p style="margin:12px 0 6px;font-weight:800;font-size:.9rem">Ring on the axle</p>
+    <div class="seg" id="ringSeg">
+      <button type="button" class="on" data-ring="split">Split ring</button>
+      <button type="button" data-ring="slip">Slip rings</button>
+    </div>
+    <p class="note" id="ringExplain">Swaps the current every half turn, so the coil keeps turning.</p>
+  </aside>
+
+  <section class="card gauges">
+    <div class="gauge-grid">
+      <div class="gauge"><div class="k">Speed</div><div class="v" id="gSpeed">0.0 turns/s</div>
+        <div class="bar"><i id="bSpeed"></i></div></div>
+      <div class="gauge"><div class="k">Current in coil</div><div class="v" id="gCurr">one way</div>
+        <div class="bar orange"><i id="bCurr"></i></div></div>
+      <div class="gauge"><div class="k">Turning push</div><div class="v" id="gPush">none</div>
+        <div class="bar red"><i id="bPush"></i></div></div>
+    </div>
+  </section>
+
+  <section class="card hold">
+    <div class="row">Hold the coil <button class="toggle" id="togHold" type="button" aria-pressed="false"><i></i></button></div>
+    <div class="slider">
+      <div class="meta"><span>Coil angle</span><b id="vAngle">0°</b></div>
+      <input type="range" id="sAngle" min="0" max="360" step="1" value="0" disabled>
+    </div>
+    <p class="hint" id="holdHint">Hold it still to feel the push at each angle.</p>
+  </section>
+</div>
+
+<script>
+(() => {
+  const S = {
+    tab: 'motor',
+    playing: true,
+    currentOn: true,
+    magFlip: false,   // false: S left / N right  (B points left← from N to S? N right → B goes right to left)
+    batFlip: false,
+    voltage: 1.5,
+    magnet: 0.9,
+    turns: 5,
+    speedMul: 0.7,
+    ring: 'split', // 'split' | 'slip'
+    hold: false,
+    angle: 0.4,      // radians
+    omega: 0,
+    showField: true,
+    showCurrent: true,
+    showForce: true,
+    showLabels: false,
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const deg = (r) => ((r * 180 / Math.PI) % 360 + 360) % 360;
+
+  // Magnetic field direction: +1 means B points to the right (N on left, S on right)
+  // Default magFlip=false: S left, N right → B points left (−1)
+  function Bdir() { return S.magFlip ? 1 : -1; }
+  function Bmag() { return S.magnet; }
+  function Ibattery() {
+    if (!S.currentOn || S.voltage <= 0) return 0;
+    return S.voltage * (S.batFlip ? -1 : 1);
+  }
+  // Current in the coil wires (after commutator)
+  // Convention: positive I means "out of page" on the top side when angle≈0...
+  // angle 0: coil vertical (long sides top/bottom) — dead zone for torque with B horizontal
+  // angle π/2: coil flat, long sides left/right — max torque
+  function Icoil() {
+    const I = Ibattery();
+    if (I === 0) return 0;
+    if (S.ring === 'split') {
+      // Reverse every half turn when crossing upright (angle mod π near 0)
+      // Use floor(angle/π) parity
+      const half = Math.floor(((S.angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2) / Math.PI);
+      return half % 2 === 0 ? I : -I;
+    }
+    return I; // slip rings: never swaps
+  }
+
+  // Torque: τ ∝ N * I_coil * B * sin(θ)
+  // For continuous rotation with split ring: after commutator, sin(θ)*Icoil keeps a consistent sign
+  // with B. With slip: restoring / reversing torque.
+  function torque() {
+    const I = Icoil();
+    const B = Bdir() * Bmag();
+    // sin(angle): 0 at upright, ±1 at flat
+    return S.turns * I * B * Math.sin(S.angle) * 0.55;
+  }
+
+  function pushLabel(t) {
+    const a = Math.abs(t);
+    if (a < 0.05) return 'none';
+    if (a < 0.35) return 'small';
+    if (a < 0.85) return 'medium';
+    return 'strong';
+  }
+
+  function currLabel() {
+    const I = Icoil();
+    if (Math.abs(I) < 1e-6) return 'off';
+    // relative to a fixed "one way"
+    return I * (S.batFlip ? -1 : 1) >= 0 ? 'one way' : 'other way';
+  }
+
+  // --- UI wiring ---
+  function setToggle(btn, on) {
+    btn.classList.toggle('on', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+  function wireToggle(id, key, extra) {
+    $(id).addEventListener('click', () => {
+      S[key] = !S[key];
+      setToggle($(id), S[key]);
+      if (extra) extra();
+      syncStatic();
+    });
+  }
+  wireToggle('togCurrent', 'currentOn');
+  wireToggle('togMag', 'magFlip', () => updateMagnets());
+  wireToggle('togBat', 'batFlip', () => updateBattery());
+  wireToggle('togHold', 'hold', () => {
+    $('sAngle').disabled = !S.hold;
+    if (S.hold) { S.omega = 0; $('sAngle').value = Math.round(deg(S.angle)); }
+    $('holdHint').textContent = S.hold
+      ? angleHint()
+      : 'Hold it still to feel the push at each angle.';
+  });
+
+  [['sVolt','voltage','vVolt', v => `${(+v).toFixed(1)} V`],
+   ['sMag','magnet','vMag', v => (+v < 0.55 ? 'weak' : +v < 1.1 ? 'medium' : 'strong')],
+   ['sTurns','turns','vTurns', v => String(+v)],
+   ['sSpeed','speedMul','vSpeed', v => `${Math.round(+v*100)}%`],
+  ].forEach(([sid, key, vid, fmt]) => {
+    $(sid).addEventListener('input', e => {
+      S[key] = +e.target.value;
+      $(vid).textContent = fmt(e.target.value);
+    });
+  });
+  $('sAngle').addEventListener('input', e => {
+    if (!S.hold) return;
+    S.angle = (+e.target.value) * Math.PI / 180;
+    S.omega = 0;
+    $('vAngle').textContent = `${e.target.value}°`;
+    $('holdHint').textContent = angleHint();
+    draw();
+  });
+
+  $('ringSeg').addEventListener('click', e => {
+    const b = e.target.closest('button[data-ring]');
+    if (!b) return;
+    S.ring = b.dataset.ring;
+    [...$('ringSeg').children].forEach(x => x.classList.toggle('on', x === b));
+    $('splitRing').style.display = S.ring === 'split' ? '' : 'none';
+    $('slipRing').style.display = S.ring === 'slip' ? '' : 'none';
+    const explain = S.ring === 'split'
+      ? 'Swaps the current every half turn, so the coil keeps turning.'
+      : 'The current never swaps, so the coil rocks and stops upright.';
+    $('ringExplain').textContent = explain;
+    $('ringNote').textContent = S.ring === 'split'
+      ? 'Split ring: swaps the current every half turn, so the coil keeps turning. Push is never backwards.'
+      : 'Slip rings: current never swaps — push reverses each half turn, so the coil rocks then stops upright.';
+    // nudge for visible behavior change
+    if (S.ring === 'slip') S.omega *= 0.4;
+  });
+
+  [['showField','showField','fieldLines'],
+   ['showCurrent','showCurrent',null],
+   ['showForce','showForce','forceArrows'],
+   ['showLabels','showLabels','partLabels']].forEach(([id, key, el]) => {
+    $(id).addEventListener('change', e => {
+      S[key] = e.target.checked;
+      if (el) $(el).style.display = e.target.checked ? '' : 'none';
+    });
+  });
+
+  $('tabs').addEventListener('click', e => {
+    const b = e.target.closest('.tab');
+    if (!b) return;
+    S.tab = b.dataset.tab;
+    [...$('tabs').children].forEach(x => x.classList.toggle('on', x === b));
+    applyTab();
+  });
+
+  $('btnPlay').addEventListener('click', () => {
+    S.playing = !S.playing;
+    $('btnPlay').textContent = S.playing ? '⏸' : '▶';
+  });
+  $('btnReset').addEventListener('click', () => {
+    S.angle = 0.4; S.omega = 0;
+    if (S.hold) { $('sAngle').value = Math.round(deg(S.angle)); $('vAngle').textContent = `${Math.round(deg(S.angle))}°`; }
+  });
+  $('btnStep').addEventListener('click', () => {
+    S.playing = false;
+    $('btnPlay').textContent = '▶';
+    step(1 / 30);
+    draw();
+  });
+
+  function angleHint() {
+    const t = Math.abs(torque());
+    const a = deg(S.angle);
+    if (t < 0.08) return `Near upright (${Math.round(a)}°): almost no turning push.`;
+    if (t < 0.4) return `Flat-ish (${Math.round(a)}°): a small turning push.`;
+    return `Flat-ish (${Math.round(a)}°): a strong turning push.`;
+  }
+
+  function updateMagnets() {
+    const leftIsS = !S.magFlip;
+    // first path is the magnet body
+    $('magLeft').querySelector('path').setAttribute('fill', leftIsS ? '#4a8fd4' : '#e85d4c');
+    $('magRight').querySelector('path').setAttribute('fill', leftIsS ? '#e85d4c' : '#4a8fd4');
+    $('magLeftLetter').textContent = leftIsS ? 'S' : 'N';
+    $('magRightLetter').textContent = leftIsS ? 'N' : 'S';
+    // B goes from N → S
+    const fl = $('fieldLines');
+    fl.innerHTML = '';
+    const from = leftIsS ? 490 : 150;
+    const to = leftIsS ? 150 : 490;
+    [140,175,210,245,280].forEach(y => {
+      const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p.setAttribute('d', `M${from} ${y} H${to}`);
+      p.setAttribute('marker-end', 'url(#arrBlue)');
+      fl.appendChild(p);
+    });
+    // part labels
+    const labels = $('partLabels').querySelectorAll('text');
+    labels[0].textContent = leftIsS ? 'south pole' : 'north pole';
+    labels[1].textContent = leftIsS ? 'north pole' : 'south pole';
+  }
+
+  function updateBattery() {
+    const plus = $('batPlus'), minus = $('batMinus');
+    const cap = $('battery').querySelector('rect:nth-child(2)');
+    if (S.batFlip) {
+      plus.setAttribute('x', '14'); minus.setAttribute('x', '48');
+      if (cap) { cap.setAttribute('x', '0'); }
+    } else {
+      plus.setAttribute('x', '48'); minus.setAttribute('x', '10');
+      if (cap) { cap.setAttribute('x', '55'); }
+    }
+  }
+
+  function applyTab() {
+    const ringLabel = $('partLabels').querySelector('text[x="320"]');
+    if (ringLabel) ringLabel.textContent = S.ring === 'split' ? 'split ring' : 'slip rings';
+    if (S.tab === 'parts') {
+      S.showLabels = true; $('showLabels').checked = true; $('partLabels').style.display = '';
+      $('magLeft').setAttribute('transform', 'translate(-28,-8)');
+      $('magRight').setAttribute('transform', 'translate(28,-8)');
+      $('rotor').style.opacity = '1';
+      S.playing = false; $('btnPlay').textContent = '▶';
+      S.hold = true; setToggle($('togHold'), true); $('sAngle').disabled = false;
+      S.omega = 0;
+    } else {
+      $('magLeft').setAttribute('transform', '');
+      $('magRight').setAttribute('transform', '');
+      if (S.tab === 'principle') {
+        S.showField = true; S.showForce = true; S.showCurrent = true; S.showLabels = false;
+        $('showField').checked = true; $('showForce').checked = true;
+        $('showCurrent').checked = true; $('showLabels').checked = false;
+        $('fieldLines').style.display = '';
+        $('forceArrows').style.display = '';
+        $('partLabels').style.display = 'none';
+        S.hold = true; setToggle($('togHold'), true); $('sAngle').disabled = false;
+        S.omega = 0; S.playing = false; $('btnPlay').textContent = '▶';
+        S.angle = Math.PI / 2; $('sAngle').value = 90; $('vAngle').textContent = '90°';
+      } else {
+        // motor
+        if (S.hold) { /* leave user state */ }
+      }
+    }
+  }
+
+  function syncStatic() {
+    updateMagnets();
+    updateBattery();
+    $('fieldLines').style.display = S.showField ? '' : 'none';
+    $('forceArrows').style.display = S.showForce ? '' : 'none';
+    $('partLabels').style.display = S.showLabels ? '' : 'none';
+    $('splitRing').style.display = S.ring === 'split' ? '' : 'none';
+    $('slipRing').style.display = S.ring === 'slip' ? '' : 'none';
+  }
+
+  // --- Drawing ---
+  function drawCrossSection() {
+    const svg = $('xsect');
+    const I = Icoil();
+    const B = Bdir();
+    const leftIsS = !S.magFlip;
+    // Coil side positions in cross-section: two wires at angle
+    const a = S.angle;
+    const cx = 130, cy = 75, r = 42;
+    const x1 = cx + r * Math.cos(a), y1 = cy + r * Math.sin(a);
+    const x2 = cx - r * Math.cos(a), y2 = cy - r * Math.sin(a);
+    // Force direction on each side: F = I × B (2D: out-of-page I with B horizontal → vertical force)
+    // I out (+), B to right (+) → F up for... Fleming: for wire, F direction from I×B
+    // Simplified: force on side1 (at angle a) — "coming out" when I>0 on that geometric side
+    // We mark side at +a as "out" when I>0
+    const Iout = I > 0;
+    const forceSign = Math.sign(I * B); // + means "push creates CCW or CW"
+    // For side at (cos a, sin a): if current out and B right, force is up (−y) or down
+    // Use: torque sign = sign(I*B*sin a) already; visualize pushes tangent for rotation
+    // Push arrows: perpendicular to radius, consistent with torque sign
+    const t = torque();
+    const pushDir = Math.sign(t) || 0; // + = increasing angle (CCW in SVG y-down is CW visually... careful)
+    // In our SVG motor, positive omega increases angle, rotor rotates visually CCW in math but
+    // with y-down SVG, positive angle is clockwise on screen. Good for "motor spin".
+
+    const leftLetter = leftIsS ? 'S' : 'N';
+    const rightLetter = leftIsS ? 'N' : 'S';
+    const bf = B > 0 ? 1 : -1;
+
+    let fieldPaths = '';
+    for (let y = 40; y <= 110; y += 18) {
+      const xA = bf > 0 ? 40 : 220;
+      const xB = bf > 0 ? 220 : 40;
+      fieldPaths += `<path d="M${xA} ${y} H${xB}" stroke="#3d7ec9" stroke-width="1.6" fill="none" marker-end="url(#arrBlue)" opacity=".7"/>`;
+    }
+
+    function wire(x, y, out) {
+      if (Math.abs(I) < 1e-6) {
+        return `<circle cx="${x}" cy="${y}" r="10" fill="#eee" stroke="#2a231c" stroke-width="2"/>`;
+      }
+      if (out) {
+        return `<circle cx="${x}" cy="${y}" r="10" fill="#ffd34d" stroke="#2a231c" stroke-width="2"/><circle cx="${x}" cy="${y}" r="3" fill="#2a231c"/>`;
+      }
+      return `<circle cx="${x}" cy="${y}" r="10" fill="#fff" stroke="#2a231c" stroke-width="2"/><text x="${x}" y="${y+4}" text-anchor="middle" font-size="12" font-weight="900">✕</text>`;
+    }
+
+    // Push arrows: along tangent
+    // For positive torque (dθ>0 = CW on screen), force on +side goes in +tangent
+    let pushes = '';
+    if (S.showForce && Math.abs(t) > 0.04) {
+      const tang = a + Math.PI / 2 * Math.sign(t);
+      const len = 22;
+      const p1x = x1 + Math.cos(a + Math.PI/2 * Math.sign(t)) * len;
+      const p1y = y1 + Math.sin(a + Math.PI/2 * Math.sign(t)) * len;
+      const p2x = x2 + Math.cos(a + Math.PI/2 * Math.sign(t) + Math.PI) * len;
+      const p2y = y2 + Math.sin(a + Math.PI/2 * Math.sign(t) + Math.PI) * len;
+      pushes = `
+        <path d="M${x1} ${y1} L${p1x} ${p1y}" stroke="#e85a9b" stroke-width="2.5" fill="none" marker-end="url(#arrPink)"/>
+        <path d="M${x2} ${y2} L${p2x} ${p2y}" stroke="#e85a9b" stroke-width="2.5" fill="none" marker-end="url(#arrPink)"/>`;
+    }
+
+    svg.innerHTML = `
+      <rect x="8" y="8" width="36" height="134" rx="6" fill="${leftIsS?'#4a8fd4':'#e85d4c'}" stroke="#2a231c" stroke-width="2"/>
+      <text x="26" y="80" text-anchor="middle" font-size="16" fill="#fff" font-weight="800">${leftLetter}</text>
+      <rect x="216" y="8" width="36" height="134" rx="6" fill="${leftIsS?'#e85d4c':'#4a8fd4'}" stroke="#2a231c" stroke-width="2"/>
+      <text x="234" y="80" text-anchor="middle" font-size="16" fill="#fff" font-weight="800">${rightLetter}</text>
+      ${fieldPaths}
+      <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#c9853a" stroke-width="5"/>
+      ${wire(x1, y1, Iout)}
+      ${wire(x2, y2, !Iout && Math.abs(I)>1e-6)}
+      ${pushes}
+      <text x="130" y="145" text-anchor="middle" font-size="11" fill="#6a5f52">cross-section</text>`;
+  }
+
+  function drawGraph() {
+    const svg = $('graph');
+    const W = 260, H = 150, pad = {l:32, r:10, t:18, b:28};
+    const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+    const samples = 120;
+    let d = '';
+    for (let i = 0; i <= samples; i++) {
+      const ang = (i / samples) * Math.PI * 2;
+      // torque vs angle for current settings (hold angle aside)
+      const Ibat = Ibattery();
+      let Ic;
+      if (Math.abs(Ibat) < 1e-9) Ic = 0;
+      else if (S.ring === 'split') {
+        const half = Math.floor(ang / Math.PI) % 2;
+        Ic = half === 0 ? Ibat : -Ibat;
+      } else Ic = Ibat;
+      const B = Bdir() * Bmag();
+      const tau = S.turns * Ic * B * Math.sin(ang) * 0.55;
+      const x = pad.l + (i / samples) * iw;
+      const y = pad.t + ih / 2 - (tau / 3) * (ih / 2);
+      d += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ' ' + y.toFixed(1);
+    }
+    const ax = pad.l + (deg(S.angle) / 360) * iw;
+    const curTau = torque();
+    const ay = pad.t + ih / 2 - (curTau / 3) * (ih / 2);
+    const note = S.ring === 'split'
+      ? 'split ring: never backwards'
+      : 'slip rings: turns backwards when upright';
+
+    svg.innerHTML = `
+      <text x="130" y="12" text-anchor="middle" font-size="12" font-weight="700">Turning push at each angle</text>
+      <line x1="${pad.l}" y1="${pad.t+ih/2}" x2="${pad.l+iw}" y2="${pad.t+ih/2}" stroke="#ccc" stroke-width="1"/>
+      <line x1="${pad.l}" y1="${pad.t}" x2="${pad.l}" y2="${pad.t+ih}" stroke="#2a231c" stroke-width="1.5"/>
+      <line x1="${pad.l}" y1="${pad.t+ih}" x2="${pad.l+iw}" y2="${pad.t+ih}" stroke="#2a231c" stroke-width="1.5"/>
+      <text x="${pad.l}" y="${H-8}" font-size="10">0°</text>
+      <text x="${pad.l+iw/2}" y="${H-8}" text-anchor="middle" font-size="10">180°</text>
+      <text x="${pad.l+iw}" y="${H-8}" text-anchor="end" font-size="10">360°</text>
+      <text x="8" y="${pad.t+8}" font-size="10">push</text>
+      <path d="${d}" fill="none" stroke="#e85a9b" stroke-width="2.2"/>
+      <circle cx="${ax}" cy="${ay}" r="5" fill="#ffd34d" stroke="#2a231c" stroke-width="1.5"/>
+      <text x="${pad.l+4}" y="${pad.t+16}" font-size="10" fill="#b85a20">${note}</text>`;
+  }
+
+  function drawMotorForces() {
+    const t = torque();
+    const a = S.angle;
+    // Coil sides in rotor local space: top (0,-70) and bottom (0,70) when a=0
+    // After rotation by a (CW in SVG): 
+    const R = 70;
+    // Side A starts at top, side B at bottom
+    const ax = 320 + R * Math.sin(a);
+    const ay = 200 - R * Math.cos(a);
+    const bx = 320 - R * Math.sin(a);
+    const by = 200 + R * Math.cos(a);
+    const len = 36 * Math.min(1.4, Math.abs(t) + 0.15);
+    // Force direction for positive torque: tends to increase a (CW on screen)
+    // Side A (was top) gets force in direction of +tangent = (cos a, sin a) in screen for CW
+    const s = Math.sign(t) || 0;
+    const fax = ax + s * len * Math.cos(a);
+    const fay = ay + s * len * Math.sin(a);
+    const fbx = bx - s * len * Math.cos(a);
+    const fby = by - s * len * Math.sin(a);
+    if (!S.showForce || Math.abs(t) < 0.04 || Math.abs(Icoil()) < 1e-6) {
+      $('forceArrows').style.display = 'none';
+    } else {
+      $('forceArrows').style.display = '';
+      $('forceL').setAttribute('d', `M${ax} ${ay} L${fax} ${fay}`);
+      $('forceR').setAttribute('d', `M${bx} ${by} L${fbx} ${fby}`);
+    }
+
+    // Spin arrow visibility
+    $('spinArrow').style.opacity = (S.playing && !S.hold && Math.abs(S.omega) > 0.2) ? '1' : '0.25';
+    // Flip spin arrow direction based on omega
+    if (S.omega < -0.05) {
+      $('spinArrow').innerHTML = `<path d="M320 95 A95 70 0 0 0 410 150"/><path d="M320 95 A95 70 0 0 1 230 150"/>`;
+    } else {
+      $('spinArrow').innerHTML = `<path d="M320 95 A95 70 0 0 1 410 150"/><path d="M320 95 A95 70 0 0 0 230 150"/>`;
+    }
+    [...$('spinArrow').querySelectorAll('path')].forEach(p => p.setAttribute('marker-end', 'url(#arrY)'));
+  }
+
+  function drawCurrentDots() {
+    const g = $('currentDots');
+    g.innerHTML = '';
+    if (!S.showCurrent || Math.abs(Icoil()) < 1e-6) return;
+    const a = S.angle;
+    const I = Icoil();
+    // Dots along left and right vertical sides of coil (in rotor space)
+    const n = 5;
+    const t = (performance.now() / 1000) * Math.sign(I);
+    for (let side of [-1, 1]) {
+      for (let i = 0; i < n; i++) {
+        let u = ((i / n) + t * 0.35) % 1;
+        if (u < 0) u += 1;
+        // side x = ±55, y from -60 to 60
+        let lx = side * 55, ly = -60 + u * 120;
+        // flow direction: for +I on +side going up or down — flip with side and I
+        // rotate into world
+        const ca = Math.cos(a), sa = Math.sin(a);
+        const wx = 320 + lx * ca - ly * sa;
+        const wy = 200 + lx * sa + ly * ca;
+        const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        c.setAttribute('cx', wx); c.setAttribute('cy', wy);
+        c.setAttribute('r', 3.5); c.setAttribute('fill', '#ffd34d');
+        c.setAttribute('stroke', '#2a231c'); c.setAttribute('stroke-width', '1');
+        g.appendChild(c);
+      }
+    }
+  }
+
+  function updateGauges() {
+    const turnsPerSec = Math.abs(S.omega) / (Math.PI * 2);
+    $('gSpeed').textContent = `${turnsPerSec.toFixed(1)} turns/s`;
+    $('bSpeed').style.width = `${Math.min(100, turnsPerSec / 4 * 100)}%`;
+    $('gCurr').textContent = currLabel();
+    const Iabs = Math.abs(Icoil()) / 3;
+    $('bCurr').style.width = `${Math.min(100, Iabs * 100)}%`;
+    const t = torque();
+    $('gPush').textContent = pushLabel(t);
+    $('bPush').style.width = `${Math.min(100, Math.abs(t) / 2.2 * 100)}%`;
+    $('vAngle').textContent = `${Math.round(deg(S.angle))}°`;
+  }
+
+  function draw() {
+    $('rotor').setAttribute('transform', `translate(320,200) rotate(${deg(S.angle)})`);
+    // windings density hint
+    const coil = $('coil');
+    // Update turns visual: more horizontal lines
+    const paths = coil.querySelector('path');
+    let d = '';
+    const n = S.turns;
+    for (let i = 0; i < n; i++) {
+      const y = -50 + (i / Math.max(1, n - 1)) * 100;
+      d += `M-50 ${y} H50 `;
+    }
+    paths.setAttribute('d', d);
+
+    drawMotorForces();
+    drawCurrentDots();
+    drawCrossSection();
+    drawGraph();
+    updateGauges();
+    if (S.hold) $('holdHint').textContent = angleHint();
+  }
+
+  function step(dt) {
+    if (S.hold) { S.omega = 0; return; }
+    const tau = torque();
+    const inertia = 0.55;
+    const damp = S.ring === 'slip' ? 0.55 : 0.18;
+    const scale = S.speedMul;
+    S.omega += (tau / inertia) * dt * 6 * scale;
+    S.omega *= Math.exp(-damp * dt * (S.ring === 'slip' ? 2.2 : 1));
+    const maxO = 14 * scale;
+    if (S.omega > maxO) S.omega = maxO;
+    if (S.omega < -maxO) S.omega = -maxO;
+    S.angle += S.omega * dt;
+    if (S.angle > Math.PI * 20) S.angle -= Math.PI * 20;
+    if (S.angle < -Math.PI * 20) S.angle += Math.PI * 20;
+  }
+
+  let last = performance.now();
+  function loop(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    if (S.playing && !S.hold) step(dt);
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  // init
+  syncStatic();
+  updateMagnets();
+  draw();
+  requestAnimationFrame(loop);
+
+  // Expose for tests
+  window.__motor = S;
+  window.__motorAPI = {
+    setRing: (r) => {
+      S.ring = r;
+      [...$('ringSeg').children].forEach(x => x.classList.toggle('on', x.dataset.ring === r));
+      $('ringSeg').querySelector(`[data-ring="${r}"]`).click();
+    },
+    torque, Icoil, draw
+  };
+})();
+</script>
+</body>
+</html>
